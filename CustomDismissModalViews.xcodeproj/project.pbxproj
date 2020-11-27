@@ -123,6 +123,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -284,9 +285,9 @@
 				DEVELOPMENT_TEAM = 69XUZ6HBUE;
 				INFOPLIST_FILE = CustomDismissModalViews/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.davidseek.CustomDismissModalViews;
+				PRODUCT_BUNDLE_IDENTIFIER = insu.party.sadfsd;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -297,9 +298,9 @@
 				DEVELOPMENT_TEAM = 69XUZ6HBUE;
 				INFOPLIST_FILE = CustomDismissModalViews/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.davidseek.CustomDismissModalViews;
+				PRODUCT_BUNDLE_IDENTIFIER = insu.party.sadfsd;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};

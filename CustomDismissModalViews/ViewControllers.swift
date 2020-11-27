@@ -3,10 +3,22 @@
 
 import UIKit
 
+extension UIViewController {
+    
+    func transition(to controller: UIViewController) {
+        let transition = CATransition()
+        transition.duration = 0.3
+        transition.type = CATransitionType.push
+        transition.subtype = CATransitionSubtype.fromRight
+        view.window?.layer.add(transition, forKey: kCATransition)
+        present(controller, animated: false)
+    }
+    
+}
 class SourceController: UIViewController, UIViewControllerTransitioningDelegate {
     
     let interactor = Interactor()
-    let transition = CATransition()
+    
     
     @IBAction func present(_ sender: Any) {
         
@@ -14,7 +26,7 @@ class SourceController: UIViewController, UIViewControllerTransitioningDelegate 
             as? DestinationController else {
                 return
         }
-        
+        controller.modalPresentationStyle = .fullScreen
         controller.transitioningDelegate = self
         controller.interactor = interactor
         
@@ -23,13 +35,6 @@ class SourceController: UIViewController, UIViewControllerTransitioningDelegate 
     
     // MARK: - Private
     
-    func transition(to controller: UIViewController) {
-        transition.duration = 0.3
-        transition.type = kCATransitionPush
-        transition.subtype = kCATransitionFromRight
-        view.window?.layer.add(transition, forKey: kCATransition)
-        present(controller, animated: false)
-    }
     
     // MARK: - Animation
     
@@ -50,9 +55,9 @@ class SourceController: UIViewController, UIViewControllerTransitioningDelegate 
     }
 }
 
-class DestinationController: UIViewController {
+class DestinationController: UIViewController, UIViewControllerTransitioningDelegate {
     
-    var interactor: Interactor? = nil
+    weak var interactor: Interactor? = nil
     let transition = CATransition()
     
     override func viewDidLoad() {
@@ -70,9 +75,91 @@ class DestinationController: UIViewController {
     
     func transitionDismissal() {
         transition.duration = 0.3
-        transition.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
-        transition.type = kCATransitionPush
-        transition.subtype = kCATransitionFromLeft
+        transition.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
+        transition.type = CATransitionType.push
+        transition.subtype = CATransitionSubtype.fromLeft
+        view.window?.layer.add(transition, forKey: nil)
+        dismiss(animated: false)
+    }
+    
+    @IBAction func dismiss(_ sender: Any) {
+        // transitionDismissal()
+        
+        guard let controller = storyboard?.instantiateViewController(withIdentifier: "VC3")
+            as? ThirdViewController else {
+                return
+        }
+        controller.modalPresentationStyle = .fullScreen
+        controller.transitioningDelegate = self
+        controller.interactor = interactor
+        
+        transition(to: controller)
+    }
+    
+    @objc func gesture(_ sender: UIScreenEdgePanGestureRecognizer) {
+        
+        let percentThreshold: CGFloat = 0.3
+        let translation = sender.translation(in: view)
+        let fingerMovement = translation.x / view.bounds.width
+        let rightMovement = fmaxf(Float(fingerMovement), 0.0)
+        let rightMovementPercent = fminf(rightMovement, 1.0)
+        let progress = CGFloat(rightMovementPercent)
+        
+        switch sender.state {
+        case .began:
+            
+            interactor?.hasStarted = true
+            dismiss(animated: true)
+            
+        case .changed:
+            
+            interactor?.shouldFinish = progress > percentThreshold
+            interactor?.update(progress)
+            
+        case .cancelled:
+            
+            interactor?.hasStarted = false
+            interactor?.cancel()
+            
+        case .ended:
+            
+            guard let interactor = interactor else { return }
+            interactor.hasStarted = false
+            interactor.shouldFinish
+                ? interactor.finish()
+                : interactor.cancel()
+            
+        default:
+            break
+        }
+    }
+}
+
+
+class ThirdViewController: UIViewController, UIViewControllerTransitioningDelegate {
+    
+    weak var interactor: Interactor? = nil
+    let transition = CATransition()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        let recognizer = UIScreenEdgePanGestureRecognizer(
+            target: self,
+            action: #selector(gesture))
+        
+        recognizer.edges = .left
+        view.addGestureRecognizer(recognizer)
+    
+    }
+    
+    // MARK: - Private
+    
+    func transitionDismissal() {
+        transition.duration = 0.3
+        transition.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
+        transition.type = CATransitionType.push
+        transition.subtype = CATransitionSubtype.fromLeft
         view.window?.layer.add(transition, forKey: nil)
         dismiss(animated: false)
     }
@@ -81,7 +168,7 @@ class DestinationController: UIViewController {
         transitionDismissal()
     }
     
-    func gesture(_ sender: UIScreenEdgePanGestureRecognizer) {
+    @objc func gesture(_ sender: UIScreenEdgePanGestureRecognizer) {
         
         let percentThreshold: CGFloat = 0.3
         let translation = sender.translation(in: view)
